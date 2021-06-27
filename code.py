@@ -115,7 +115,7 @@ reviews_labels
 encoder = LabelEncoder()
 encoder.fit(label_array)
 encoded_labels = encoder.transform(label_array)
-#encoded_labels = to_categorical(encoded_labels)
+encoded_labels = to_categorical(encoded_labels)
 encoded_labels
 
 ##### Train and Test
