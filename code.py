@@ -36,7 +36,7 @@ nltk.download('stopwords')
 
 """ Dataset"""
 
-df=pd.read_excel("4a-english/4A-English/SemEval2017.xlsx")
+df=pd.read_excel("SemEval2017A.xlsx")
 
 df.drop("Unnamed: 3", axis=1, inplace=True)
 df.drop("Unnamed: 4", axis=1, inplace=True)
@@ -46,6 +46,8 @@ df.head()
 
 df.Comments=df.Comments.str.lower()
 df.head() 
+
+
 ###################STOP WORDS################
 #STOP WORDS
 #Tokenization of text
@@ -65,6 +67,8 @@ def remove_stopwords(text, is_lower_case=False):
     return filtered_text
 #Apply function on review column
 df['Comments']=df['Comments'].apply(remove_stopwords)
+
+
 
 ############supprission des caractere spiciaux Dans Commantaire #########
 df['Comments'] = df['Comments'].apply(lambda x: re.sub(r'https?:\/\/\S+', ' ', str(x)))
@@ -111,7 +115,7 @@ reviews_labels
 encoder = LabelEncoder()
 encoder.fit(label_array)
 encoded_labels = encoder.transform(label_array)
-encoded_labels = to_categorical(encoded_labels)
+#encoded_labels = to_categorical(encoded_labels)
 encoded_labels
 
 ##### Train and Test
@@ -135,7 +139,7 @@ review_train
 ##### Model #####
 
 model = Sequential()
-model.add(Embedding(input_dim=40000,output_dim=100,input_length=128,trainable=True))
+model.add(Embedding(input_dim=40000,output_dim=100,input_length=100,trainable=True))
 model.add(LSTM(units=100, return_sequences=True, input_shape=(maxlen,3)))
 model.add(Dropout(0.2))
 
@@ -151,7 +155,5 @@ model.add(Dropout(0.2))
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 
 model.summary()
-
-
 
 history=model.fit(review_train,label_train, epochs=6,batch_size=64,validation_data=(review_test,label_test))  
