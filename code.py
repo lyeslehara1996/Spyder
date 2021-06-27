@@ -28,9 +28,6 @@ from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
 from sklearn.model_selection import train_test_split
 
 from nltk.corpus import stopwords
-from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import confusion_matrix,classification_report
 from keras.utils.np_utils import to_categorical
 nltk.download('stopwords')
 
