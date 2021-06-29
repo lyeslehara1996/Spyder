@@ -47,6 +47,7 @@ df.head()
 
 df.info()
 
+#supprimer les lignes qui contient des valeur null 
 df.Polarity.unique()
 df.dropna(subset=['Polarity'], inplace=True)
 df.Polarity.unique()
@@ -140,8 +141,12 @@ review_test=tokenizer.texts_to_sequences(review_test)
 review_test=pad_sequences(review_test, maxlen=maxlen, truncating='post', padding='post')
 
 review_train
-##### Model #####
 
+
+print(review_train.shape, label_train.shape)
+print(review_test.shape, label_test.shape)
+
+##### Model #####
 model = Sequential()
 model.add(Embedding(input_dim=40000,output_dim=100,input_length=100,trainable=True))
 model.add(LSTM(units=100, return_sequences=True, input_shape=(maxlen,3)))
