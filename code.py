@@ -22,6 +22,7 @@ from nltk.tokenize import TweetTokenizer
 import string as st
 SAVEd = False
 
+from sklearn.preprocessing import LabelEncoder
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
@@ -44,6 +45,12 @@ df.head()
 df.Comments=df.Comments.str.lower()
 df.head() 
 
+df.info()
+
+df.Polarity.unique()
+df.dropna(subset=['Polarity'], inplace=True)
+df.Polarity.unique()
+df.info()
 
 ###################STOP WORDS################
 #STOP WORDS
@@ -145,10 +152,7 @@ model.add(Dropout(0.2))
 
 model.add(LSTM(units=100, return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(units=100, return_sequences=True))
-model.add(Dropout(0.2))
-model.add(LSTM(units=100, return_sequences=True))
-model.add(Dropout(0.2))
+
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 
 model.summary()
