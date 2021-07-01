@@ -154,10 +154,9 @@ vocab_size = len(tokenizer.word_index) + 1
 vocab_size
 
 
-#### les donnee de validation ####
 
 
-#### Model  #####
+#### Model_1 #####
 """ Ce model ca marche pas """
 model = Sequential()
 model.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
@@ -172,9 +171,33 @@ model.summary()
 history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
 model.evaluate(review_test, label_test, verbose=1)
 
+### Model_2###
+
+""" Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire
+    et le resultat de accuracy ne s'améliore pas 
+    et aussi j'ai pas compris le principe de la couche Embedding 
+ """
+
+
+Model_2 = Sequential()
+Model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
+
+Model_2.add(LSTM(100,dropout=0.2,return_sequences=True ))
+
+Model_2.add(LSTM(100,dropout=0.2))
+Model_2.add(Dense(3,activation='softmax'))
+Model_2.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+
+Model_2.summary()
+
+history=Model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+
+
 plt.figure(figsize=(16,5))
 epoch=range(1,len(history.history['accuracy'])+1)
 plt.plot(epoch,history.history['loss'],'b',label='training', color='red')
 plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
 plt.legend()
 plt.show()
+
+Model_2.evaluate(review_test, label_test, verbose=1)
