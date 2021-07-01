@@ -42,8 +42,6 @@ df.drop("Unnamed: 5", axis=1, inplace=True)
 df.drop("Unnamed: 6", axis=1, inplace=True)
 df.head()
 
-df.Comments=df.Comments.str.lower()
-df.head() 
 
 df.info()
 
@@ -52,6 +50,17 @@ df.Polarity.unique()
 df.dropna(subset=['Polarity'], inplace=True)
 df.Polarity.unique()
 df.info()
+
+
+plt.figure(figsize=(8,6))
+df.Polarity.hist(xlabelsize=14)
+plt.show()
+
+#### transformet les mots en miniscule ######
+df.Comments=df.Comments.str.lower()
+df.head() 
+
+
 
 ###################STOP WORDS################
 #STOP WORDS
