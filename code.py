@@ -177,14 +177,14 @@ model.add(Dropout(0.2))
 model.add(Dense(3,activation='softmax'))
 model.summary()
 
-history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+history=model.fit(review_train, label_train, batch_size=100, epochs=5, verbose=1, validation_split=0.2)
 model.evaluate(review_test, label_test, verbose=1)
 
 ### Model_2###
 
 """ Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire
     et le resultat de accuracy ne s'améliore pas (reste stable) meme si on augmente le nombre de neurone et le nombre d'epoch utilise 
-    et aussi j'ai pas compris le principe de la couche Embedding 
+    et aussi j'ai pas compris bien  le principe de la couche Embedding 
  """
 
 
