@@ -31,7 +31,7 @@ from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
 from keras.utils.np_utils import to_categorical
 nltk.download('stopwords')
-
+nltk.download('punkt')
 """ Dataset"""
 
 df=pd.read_excel("SemEval2017A.xlsx")
@@ -56,6 +56,7 @@ df.info()
 ###################STOP WORDS################
 #STOP WORDS
 #Tokenization of text
+
 tokenizer=ToktokTokenizer()
 #Setting English stopwords
 stopword_list=nltk.corpus.stopwords.words('english')
@@ -84,18 +85,21 @@ df['Comments'] = df['Comments'].apply(lambda x: re.sub(r"[^a-z]", ' ', str(x)))
 df['Comments'] = df['Comments'].apply(lambda x: re.sub(r'@mention', ' ', str(x)))
 df['Comments'] = df['Comments'].apply(lambda x: " ".join(x.lower() for x in str(x).split()  if len(x)>3 ))
 
-#################Supprission des caractere speciaux dans Polarity#################
 
-
-df['Polarity'] = df['Polarity'].apply(lambda x: re.sub(r'https?:\/\/\S+><', ' ', str(x)))
-df.Polarity.value_counts()
-print(df)
 
 #######deviser en review and labels ######
 
 
 reviews =  df[['Comments']]
 labels =  df[['Polarity']]
+
+corpus= []
+for text in reviews['Comments']:
+    words= [word.lower() for word in word_tokenize(text)]
+    corpus.append(words)
+
+num_words=len(corpus)
+print(num_words)
 
 ####reviews sans ponctuation #######
 
@@ -131,7 +135,7 @@ print(review_test.shape, label_test.shape)
 
 #########tokenizer review ###########
 maxlen=100
-tokenizer =Tokenizer(num_words=40000)
+tokenizer =Tokenizer(num_words=num_words)
 tokenizer.fit_on_texts(review_train)
 review_train=tokenizer.texts_to_sequences(review_train)
 review_train=pad_sequences(review_train, maxlen=maxlen, truncating='post', padding='post')
@@ -146,20 +150,35 @@ review_train
 print(review_train.shape, label_train.shape)
 print(review_test.shape, label_test.shape)
 
+vocab_size = len(tokenizer.word_index) + 1
+vocab_size
+
+
+
+
+
+
 ##### Model #####
 model = Sequential()
-model.add(Embedding(input_dim=40000,output_dim=100,input_length=100,trainable=True))
-model.add(LSTM(units=100, return_sequences=True, input_shape=(maxlen,3)))
-model.add(Dropout(0.2))
+model.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
 
-model.add(LSTM(units=100, return_sequences=True))
-model.add(Dropout(0.2))
+model.add(LSTM(100,dropout=0.2,return_sequences=True ))
 
-model.add(LSTM(units=100, return_sequences=True))
-model.add(Dropout(0.2))
-
+model.add(LSTM(100,dropout=0.2))
+model.add(Dense(3,activation='softmax'))
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 
 model.summary()
 
-history=model.fit(review_train,label_train, epochs=6,batch_size=64,validation_data=(review_test,label_test))  
+history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+model.evaluate(review_test, label_test, verbose=1)
+
+plt.figure(figsize=(16,5))
+epoch=range(1,len(history.history['accuracy'])+1)
+plt.plot(epoch,history.history['loss'],'b',label='training', color='red')
+plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
+plt.legend()
+plt.show()
+
+
+
