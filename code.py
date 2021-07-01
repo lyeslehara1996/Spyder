@@ -129,7 +129,7 @@ reviews_labels = np.stack((review_array, label_array), axis = 1)
 
 reviews_labels
 
-########Encoder les polarity en oneHot encoding ##############
+########Encoder les polarity  ##############
 encoder = LabelEncoder()
 encoder.fit(label_array)
 encoded_labels = encoder.transform(label_array)
