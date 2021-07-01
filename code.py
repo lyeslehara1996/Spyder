@@ -129,7 +129,7 @@ reviews_labels = np.stack((review_array, label_array), axis = 1)
 
 reviews_labels
 
-########Encoder les polarity ##############
+########Encoder les polarity en oneHot encoding ##############
 encoder = LabelEncoder()
 encoder.fit(label_array)
 encoded_labels = encoder.transform(label_array)
@@ -177,7 +177,7 @@ model.add(Dropout(0.2))
 model.add(Dense(3,activation='softmax'))
 model.summary()
 
-history=model.fit(review_train, label_train, batch_size=100, epochs=5, verbose=1, validation_split=0.2)
+history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
 model.evaluate(review_test, label_test, verbose=1)
 
 ### Model_2###
