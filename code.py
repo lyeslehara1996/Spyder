@@ -158,7 +158,9 @@ vocab_size
 
 
 
-##### Model #####
+##### Model1 #####
+
+""" Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire """
 model = Sequential()
 model.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
 
@@ -181,4 +183,15 @@ plt.legend()
 plt.show()
 
 
+#### Model 2 #####
+""" Ce model ca marche pas """
+model_2 = Sequential()
 
+model_2.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
+model_2.add(Dropout(0.2))
+model_2.add(LSTM(units=50, return_sequences=True))
+model_2.add(Dropout(0.2))
+model_2.add(LSTM(units=50, return_sequences=True))
+model_2.add(Dropout(0.2))
+model_2.add(Dense(3,activation='softmax'))
+model.summary()
