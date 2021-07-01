@@ -157,21 +157,20 @@ vocab_size
 #### les donnee de validation ####
 
 
-#### Model 2 #####
+#### Model  #####
 """ Ce model ca marche pas """
-model_2 = Sequential()
+model = Sequential()
+model.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
+model.add(Dropout(0.2))
+model.add(LSTM(units=50, return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(units=50, return_sequences=True))
+model.add(Dropout(0.2))   
+model.add(Dense(3,activation='softmax'))
+model.summary()
 
-model_2.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
-model_2.add(Dropout(0.2))
-model_2.add(LSTM(units=50, return_sequences=True))
-model_2.add(Dropout(0.2))
-model_2.add(LSTM(units=50, return_sequences=True))
-model_2.add(Dropout(0.2))   
-model_2.add(Dense(3,activation='softmax'))
-model_2.summary()
-
-history=model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
-model_2.evaluate(review_test, label_test, verbose=1)
+history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+model.evaluate(review_test, label_test, verbose=1)
 
 plt.figure(figsize=(16,5))
 epoch=range(1,len(history.history['accuracy'])+1)
