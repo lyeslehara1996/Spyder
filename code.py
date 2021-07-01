@@ -154,8 +154,13 @@ vocab_size = len(tokenizer.word_index) + 1
 vocab_size
 
 
-
-
+#### les donnee de validation ####
+"""
+Reviews_train, Reviews_val, Labels_train, labels_val = train_test_split(review_train, 
+                                                                  label_train, 
+                                                                  test_size=0.1, 
+                                                                  random_state=42)
+"""
 
 
 ##### Model1 #####
