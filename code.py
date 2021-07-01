@@ -155,37 +155,6 @@ vocab_size
 
 
 #### les donnee de validation ####
-"""
-Reviews_train, Reviews_val, Labels_train, labels_val = train_test_split(review_train, 
-                                                                  label_train, 
-                                                                  test_size=0.1, 
-                                                                  random_state=42)
-"""
-
-
-##### Model1 #####
-
-""" Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire """
-model = Sequential()
-model.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
-
-model.add(LSTM(100,dropout=0.2,return_sequences=True ))
-
-model.add(LSTM(100,dropout=0.2))
-model.add(Dense(3,activation='softmax'))
-model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-
-model.summary()
-
-history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
-model.evaluate(review_test, label_test, verbose=1)
-
-plt.figure(figsize=(16,5))
-epoch=range(1,len(history.history['accuracy'])+1)
-plt.plot(epoch,history.history['loss'],'b',label='training', color='red')
-plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
-plt.legend()
-plt.show()
 
 
 #### Model 2 #####
@@ -197,6 +166,16 @@ model_2.add(Dropout(0.2))
 model_2.add(LSTM(units=50, return_sequences=True))
 model_2.add(Dropout(0.2))
 model_2.add(LSTM(units=50, return_sequences=True))
-model_2.add(Dropout(0.2))
+model_2.add(Dropout(0.2))   
 model_2.add(Dense(3,activation='softmax'))
-model.summary()
+model_2.summary()
+
+history=model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+model_2.evaluate(review_test, label_test, verbose=1)
+
+plt.figure(figsize=(16,5))
+epoch=range(1,len(history.history['accuracy'])+1)
+plt.plot(epoch,history.history['loss'],'b',label='training', color='red')
+plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
+plt.legend()
+plt.show()
