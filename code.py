@@ -136,7 +136,7 @@ encoded_labels = encoder.transform(label_array)
 encoded_labels = to_categorical(encoded_labels)
 encoded_labels
 
-##### Train and Test
+##### Train and Test######
 review_train, review_test, label_train, label_test = train_test_split(reviews_cleaned, encoded_labels, test_size=0.20, random_state=42)
 
 print(review_train.shape, label_train.shape)
@@ -156,8 +156,24 @@ review_test=pad_sequences(review_test, maxlen=maxlen, truncating='post', padding
 review_train
 
 
+
 print(review_train.shape, label_train.shape)
 print(review_test.shape, label_test.shape)
+
+review_train.shape[0]
+
+"""
+review_train =np.reshape(review_train,(review_train.shape[0],review_train.shape[1],1))
+review_test =np.reshape(review_test,(review_test.shape[0],review_test.shape[1],1))
+label_train =np.reshape(label_train,(label_train.shape[0],label_train.shape[1],1))
+label_test =np.reshape(label_test,(label_test.shape[0],label_test.shape[1],1))
+
+
+print(review_train.shape, label_train.shape)
+print(review_test.shape, label_test.shape)
+"""
+
+
 
 vocab_size = len(tokenizer.word_index) + 1
 vocab_size
@@ -167,19 +183,23 @@ vocab_size
 
 #### Model_1 #####
 """ Ce model ca marche pas """
+
+"""
 model = Sequential()
 model.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
-model.add(Dropout(0.2))
 model.add(LSTM(units=50, return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(units=50, return_sequences=True))
-model.add(Dropout(0.2))   
+model.add(Dropout(0.2))
 model.add(Dense(3,activation='softmax'))
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 model.summary()
 
 history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
 model.evaluate(review_test, label_test, verbose=1)
 
+review_train.shape
+"""
 ### Model_2###
 
 """ Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire
@@ -188,18 +208,21 @@ model.evaluate(review_test, label_test, verbose=1)
  """
 
 
-Model_2 = Sequential()
-Model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
+model_2 = Sequential()
+model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
 
-Model_2.add(LSTM(100,dropout=0.2,return_sequences=True ))
+model_2.add(LSTM(100,return_sequences=True ))
+model_2.add(Dropout(0.2))
+    
+model_2.add(LSTM(100,return_sequences=True))
+model_2.add(Dropout(0.2))
 
-Model_2.add(LSTM(100,dropout=0.2))
-Model_2.add(Dense(3,activation='softmax'))
-Model_2.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+model_2.add(Dense(3,activation='softmax'))
+model_2.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 
-Model_2.summary()
+model_2.summary()
 
-history=Model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+history=model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
 
 
 plt.figure(figsize=(16,5))
@@ -209,4 +232,4 @@ plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
 plt.legend()
 plt.show()
 
-Model_2.evaluate(review_test, label_test, verbose=1)
+model_2.evaluate(review_test, label_test, verbose=1)
