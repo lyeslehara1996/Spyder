@@ -217,6 +217,10 @@ print(review_test.shape, label_test.shape)
 
 
 model = Sequential()
+
+model.add(LSTM(units=100, return_sequences=True, input_shape=(100,3))
+model.add(Dropout(0.2))
+
 model.add(LSTM(units=50, return_sequences=True, input_shape=(100,3))
 model.add(Dropout(0.2))
 
@@ -245,9 +249,6 @@ Model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,train
 Model_2.add(Dropout(0.2))
 
 Model_2.add(LSTM(100,dropout=0.2,return_sequences=True ))
-Model_2.add(Dropout(0.2))
-
-Model_2.add(Dense(50,activation='relu'))
 Model_2.add(Dropout(0.2))
 
 Model_2.add(LSTM(50,dropout=0.2,return_sequences=True))
