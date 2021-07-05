@@ -268,11 +268,71 @@ plt.show()
 
 
 
+########## models 2 #########
 
 
+acc_par_fold = []
+loss_par_fold = []
+# Define the K-fold Cross Validator
+kfold = KFold(n_splits=3, shuffle=True)
 
+# K-fold Cross Validation model evaluation
+fold_no = 1
+for train, test in kfold.split(reviews, encoded_labels):
 
+  # Define the model architecture
+  model = Sequential()
+  model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
+  model.add(LSTM(100,dropout=0.2,return_sequences=True ))
+  model.add(Dropout(0.2))
+  model.add(Dense(100,activation='relu'))
+  model.add(Dropout(0.2))
+  model.add(LSTM(50,dropout=0.2,return_sequences=True ))
+  model.add(Dropout(0.2))
+  model.add(LSTM(25,dropout=0.2))
+  model.add(Dropout(0.2))
+  model.add(Dense(1,activation='softmax'))
 
+  # Compile the model
+  model.compile(loss='categorical_crossentropy',
+                optimizer='adam',
+                metrics=['accuracy'])
+
+  # Generate a print
+  print('------------------------------------------------------------------------')
+  print(f'Training for fold {fold_no} ...')
+
+  # Fit data to model
+  history = model.fit(reviews[train], encoded_labels[train],
+              batch_size=100,
+              epochs=5,
+              verbose=0)
+  
+  # Generate generalization metrics
+  scores = model.evaluate(reviews[test], encoded_labels[test], verbose=0)
+  print(f'Score for fold {fold_no}: {model.metrics_names[0]} of {scores[0]}; {model.metrics_names[1]} of {scores[1]*100}%')
+  acc_par_fold.append(scores[1] * 100)
+  loss_par_fold.append(scores[0])
+
+  # Increase fold number
+  fold_no = fold_no + 1
+  
+# == Provide average scores ==
+print('------------------------------------------------------------------------')
+print('Score par fold')
+for i in range(0, len(acc_par_fold)):
+  print('------------------------------------------------------------------------')
+  print(f'> Fold {i+1} - Loss: {loss_par_fold[i]} - Accuracy: {acc_par_fold[i]}%')
+print('------------------------------------------------------------------------')
+print('Average scores for all folds:')
+print(f'> Accuracy: {np.mean(acc_par_fold)} (+- {np.std(acc_par_fold)})')
+print(f'> Loss: {np.mean(loss_par_fold)}')
+print('------------------------------------------------------------------------')
+
+######### Sauvegarder le model###########
+
+filepath = './Models/model2.h5'
+save_model(model, filepath,save_format='h5')
 
 
 
