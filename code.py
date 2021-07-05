@@ -46,6 +46,8 @@ df.head()
 df.info()
 
 #supprimer les lignes qui contient des valeur null 
+
+
 df.Polarity.unique()
 df.dropna(subset=['Polarity'], inplace=True)
 df.Polarity.unique()
@@ -57,12 +59,16 @@ df.Polarity.hist(xlabelsize=14)
 plt.show()
 
 #### transformet les mots en miniscule ######
+
+
 df.Comments=df.Comments.str.lower()
 df.head() 
 
 
 
 ###################STOP WORDS################
+
+
 #STOP WORDS
 #Tokenization of text
 
@@ -86,6 +92,8 @@ df['Comments']=df['Comments'].apply(remove_stopwords)
 
 
 ############supprission des caractere spiciaux Dans Commantaire #########
+
+
 df['Comments'] = df['Comments'].apply(lambda x: re.sub(r'https?:\/\/\S+', ' ', str(x)))
 df['Comments'] = df['Comments'].apply(lambda x: re.sub(r"www\.[a-z]?\.?(com)+|[a-z]+\.(com)", ' ', str(x)))
 df['Comments'] = df['Comments'].apply(lambda x: re.sub(r'{link}', ' ', str(x)))
@@ -101,6 +109,13 @@ df['Comments'] = df['Comments'].apply(lambda x: " ".join(x.lower() for x in str(
 
 reviews =  df[['Comments']]
 labels =  df[['Polarity']]
+
+
+######## exporter les dataframe #######
+reviews.to_excel("F:/PFE/dossier de travail/data/reviews.xlsx", index=None)
+labels.to_excel("F:/PFE/dossier de travail/data/labels.xlsx", index=None)
+
+
 
 corpus= []
 for text in reviews['Comments']:
@@ -129,7 +144,9 @@ reviews_labels = np.stack((review_array, label_array), axis = 1)
 
 reviews_labels
 
-########Encoder les polarity  ##############
+########Encoder les polarity avec One-Hot encoding  ##############
+
+
 encoder = LabelEncoder()
 encoder.fit(label_array)
 encoded_labels = encoder.transform(label_array)
@@ -137,23 +154,29 @@ encoded_labels = to_categorical(encoded_labels)
 encoded_labels
 
 ##### Train and Test######
+
+
 review_train, review_test, label_train, label_test = train_test_split(reviews_cleaned, encoded_labels, test_size=0.20, random_state=42)
 
 print(review_train.shape, label_train.shape)
 print(review_test.shape, label_test.shape)
 
 #########tokenizer review ###########
-maxlen=100
-tokenizer =Tokenizer(num_words=num_words)
+
+
+
+tokenizer = Tokenizer(num_words=4000)
 tokenizer.fit_on_texts(review_train)
-review_train=tokenizer.texts_to_sequences(review_train)
-review_train=pad_sequences(review_train, maxlen=maxlen, truncating='post', padding='post')
 
+review_train = tokenizer.texts_to_sequences(review_train)
+review_test = tokenizer.texts_to_sequences(review_test)
 
-review_test=tokenizer.texts_to_sequences(review_test)
-review_test=pad_sequences(review_test, maxlen=maxlen, truncating='post', padding='post')
+vocab_size = len(tokenizer.word_index) + 1
 
-review_train
+maxlen = 100
+
+review_train = pad_sequences(review_train, padding='post', maxlen=maxlen)
+review_test = pad_sequences(review_test, padding='post', maxlen=maxlen)
 
 
 
@@ -162,10 +185,24 @@ print(review_test.shape, label_test.shape)
 
 review_train.shape[0]
 
-"""
+
+######## enregistrer des donnees d'entrainement  et les donnees de test###########
+  
+pd.DataFrame(review_train).to_excel("F:/PFE/dossier de travail/train/review_train.xlsx")
+pd.DataFrame(review_test).to_excel("F:/PFE/dossier de travail/test/review_test.xlsx")
+pd.DataFrame(label_train).to_excel("F:/PFE/dossi/er de travail/train/label_train.xlsx")
+pd.DataFrame(label_test).to_excel("F:/PFE/dossier de travail/test/label_test.xlsx")
+
+
+
+########### redemontionner les donnes #############
+
+
 review_train =np.reshape(review_train,(review_train.shape[0],review_train.shape[1],1))
+label_train =np.reshape(label_train,(label_train.shape[0],label_train.shape[1],-1))
+"""
 review_test =np.reshape(review_test,(review_test.shape[0],review_test.shape[1],1))
-label_train =np.reshape(label_train,(label_train.shape[0],label_train.shape[1],1))
+
 label_test =np.reshape(label_test,(label_test.shape[0],label_test.shape[1],1))
 
 
@@ -174,55 +211,56 @@ print(review_test.shape, label_test.shape)
 """
 
 
-
-vocab_size = len(tokenizer.word_index) + 1
-vocab_size
-
-
-
-
 #### Model_1 #####
+
 """ Ce model ca marche pas """
 
-"""
+
 model = Sequential()
-model.add(LSTM(units=50, return_sequences=True, input_shape=(maxlen,3)))
-model.add(LSTM(units=50, return_sequences=True))
-model.add(Dropout(0.2))
-model.add(LSTM(units=50, return_sequences=True))
-model.add(Dropout(0.2))
-model.add(Dense(3,activation='softmax'))
+model.add(LSTM(units=50, return_sequences=True, input_shape=(None,1)))
+
+model.add(Dense(1,activation='softmax'))
+
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+
 model.summary()
 
-history=model.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+history=model.fit(review_train, label_train, batch_size=128, epochs=10, verbose=1, validation_split=0.2)
 model.evaluate(review_test, label_test, verbose=1)
 
 review_train.shape
-"""
+
+
+
+
+
+
 ### Model_2###
 
-""" Ce model ca marche mais l'erreur s'affiche lorsque on ajoute des couche supplementaire
-    et le resultat de accuracy ne s'améliore pas (reste stable) meme si on augmente le nombre de neurone et le nombre d'epoch utilise 
-    et aussi j'ai pas compris bien  le principe de la couche Embedding 
- """
+Model_2 = Sequential()
 
 
-model_2 = Sequential()
-model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
+Model_2.add(Embedding(input_dim=vocab_size,output_dim=100,input_length=100,trainable=True))
+Model_2.add(Dropout(0.2))
 
-model_2.add(LSTM(100,return_sequences=True ))
-model_2.add(Dropout(0.2))
-    
-model_2.add(LSTM(100,return_sequences=True))
-model_2.add(Dropout(0.2))
+Model_2.add(LSTM(100,dropout=0.2,return_sequences=True ))
+Model_2.add(Dropout(0.2))
 
-model_2.add(Dense(3,activation='softmax'))
-model_2.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+Model_2.add(Dense(50,activation='relu'))
+Model_2.add(Dropout(0.2))
 
-model_2.summary()
+Model_2.add(LSTM(50,dropout=0.2,return_sequences=True))
 
-history=model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+Model_2.add(Dropout(0.2))
+
+Model_2.add(Dense(3,activation='softmax'))
+
+Model_2.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+
+Model_2.summary()
+
+history=Model_2.fit(review_train, label_train, batch_size=128, epochs=5, verbose=1, validation_split=0.2)
+
 
 
 plt.figure(figsize=(16,5))
@@ -232,4 +270,4 @@ plt.plot(epoch,history.history['val_loss'],'b',label='validation Loss')
 plt.legend()
 plt.show()
 
-model_2.evaluate(review_test, label_test, verbose=1)
+Model_2.evaluate(review_test, label_test, verbose=1)

@@ -59,6 +59,8 @@ df.polariy.value_counts()
 df.info()
 
 #supprimer les lignes qui contient des valeur null 
+
+
 df.polariy.unique()
 df.dropna(subset=['polariy'], inplace=True)
 df.polariy.unique()
@@ -69,11 +71,14 @@ df.polariy.hist(xlabelsize=14)
 plt.show()
 
 #df_clean = df
+
+
 df['Comments']=df.Comments.str.lower()
 
-"""**Prétraitement**
 
+"""**Prétraitement**
 Suppression des symbole
+
 """
 
 df.Comments = df.Comments.apply(lambda x: re.sub(r'https?:\/\/\S+', ' ', str(x)))
@@ -96,6 +101,8 @@ stop=set(stopwords.words('english'))
 print(stop)
 
 #removing the stopwords
+
+
 def remove_stopwords(text, is_lower_case=False):
     tokens = tokenizer.tokenize(text)
     tokens = [token.strip() for token in tokens]
@@ -119,10 +126,14 @@ print(num_words)
 
 df.info()
 
+######decomposition de dataframe #########
+
 reviews =  df[['Comments']]
 labels =  df[['polariy']]
 reviews
 
+
+#######supprimer de ponctuation ########
 
 
 revue_sans_ponctuation=[]
@@ -134,6 +145,7 @@ reviews_cleaned = np.asarray(revue_sans_ponctuation)
 reviews_cleaned
 
 
+###### convertir to array ###########
 
 review_array = np.asarray(reviews['Comments'])
 label_array = np.asarray(labels['polariy'])
@@ -150,7 +162,7 @@ for i, text in enumerate(reviews_labels[:,0:1]):
 reviews_labels = np.delete(reviews_labels, list_index, axis=0)
 reviews_labels
 
-##Encoder les polarity 
+##### Encoder les polarity  avec le codage ordinal  ###########
 
 encoder = LabelEncoder()
 encoder.fit(labels['polariy'])
@@ -158,6 +170,8 @@ encoded_labels = encoder.transform(labels['polariy'])
 #encoded_labels = to_categorical(encoded_labels)
 
 encoded_labels
+
+########## Encoder  les Texts #########
 
 tokenizer = Tokenizer(num_words=num_words)
 tokenizer.fit_on_texts(reviews_cleaned)
@@ -175,6 +189,9 @@ from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 
+
+############ evaluation du model1 avec la technique de K-fold cross validation #########
+
 acc_par_fold = []
 loss_par_fold = []
 # Define the K-fold Cross Validator
@@ -187,8 +204,12 @@ for train, test in kfold.split(reviews, encoded_labels):
   # Define the model architecture
   model = Sequential()
   model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
-  model.add(LSTM(100,dropout=0.1,return_sequences=True ))
-  model.add(LSTM(100,dropout=0.1))
+  model.add(LSTM(100,dropout=0.2,return_sequences=True ))
+  model.add(Dropout(0.2))
+  model.add(LSTM(100,dropout=0.2,return_sequences=True ))
+  model.add(Dropout(0.2))
+  model.add(LSTM(100,dropout=0.2))
+  model.add(Dropout(0.2))
   model.add(Dense(1,activation='softmax'))
 
   # Compile the model
@@ -203,14 +224,14 @@ for train, test in kfold.split(reviews, encoded_labels):
   # Fit data to model
   history = model.fit(reviews[train], encoded_labels[train],
               batch_size=100,
-              epochs=3,
+              epochs=5,
               verbose=0)
   
   # Generate generalization metrics
   scores = model.evaluate(reviews[test], encoded_labels[test], verbose=0)
   print(f'Score for fold {fold_no}: {model.metrics_names[0]} of {scores[0]}; {model.metrics_names[1]} of {scores[1]*100}%')
-  accuracy= acc_par_fold.append(scores[1] * 100)
-  loss= loss_par_fold.append(scores[0])
+  acc_par_fold.append(scores[1] * 100)
+  loss_par_fold.append(scores[0])
 
   # Increase fold number
   fold_no = fold_no + 1
@@ -218,21 +239,25 @@ for train, test in kfold.split(reviews, encoded_labels):
 # == Provide average scores ==
 print('------------------------------------------------------------------------')
 print('Score par fold')
-for i in range(0, len(accuracy)):
+for i in range(0, len(acc_par_fold)):
   print('------------------------------------------------------------------------')
-  print(f'> Fold {i+1} - Loss: {loss_par_fold[i]} - Accuracy: {accuracy[i]}%')
+  print(f'> Fold {i+1} - Loss: {loss_par_fold[i]} - Accuracy: {acc_par_fold[i]}%')
 print('------------------------------------------------------------------------')
 print('Average scores for all folds:')
-print(f'> Accuracy: {np.mean(acc_par_fold)} (+- {np.std(accuracy)})')
+print(f'> Accuracy: {np.mean(acc_par_fold)} (+- {np.std(acc_par_fold)})')
 print(f'> Loss: {np.mean(loss_par_fold)}')
 print('------------------------------------------------------------------------')
 
-# Save the model
-filepath = './Models/model1.h5'
+######### Sauvegarder le model###########
+
+filepath = './Models/model2.h5'
 save_model(model, filepath,save_format='h5')
 
-
-
+plt.figure(figsize=(16,5))
+epoch=range(1,len(history.history['accuracy'])+1)
+plt.plot(epoch,history.history['accuracy'],'b',label='training', color='b')
+plt.legend()
+plt.show()
 
 
 
