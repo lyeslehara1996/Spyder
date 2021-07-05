@@ -217,9 +217,10 @@ print(review_test.shape, label_test.shape)
 
 
 model = Sequential()
-model.add(LSTM(units=50, return_sequences=True, input_shape=(None,1)))
+model.add(LSTM(units=50, return_sequences=True, input_shape=(100,3))
+model.add(Dropout(0.2))
 
-model.add(Dense(1,activation='softmax'))
+model.add(Dense(3,activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 

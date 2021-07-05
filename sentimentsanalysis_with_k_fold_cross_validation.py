@@ -21,6 +21,8 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
 from sklearn.model_selection import train_test_split
+from keras.models import load_model
+
 
 from nltk.corpus import stopwords
 from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
@@ -252,6 +254,10 @@ print('------------------------------------------------------------------------'
 
 filepath = './Models/model2.h5'
 save_model(model, filepath,save_format='h5')
+
+########## load models ##########
+
+model = load_model ( 'F:/PFE/dossier de travail/Models/model2.h5 ')
 
 plt.figure(figsize=(16,5))
 epoch=range(1,len(history.history['accuracy'])+1)
