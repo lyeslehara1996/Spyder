@@ -351,7 +351,7 @@ for train, test in kfold.split(reviews, encoded_labels):
   model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
   model.add(LSTM(100,dropout=0.1,return_sequences=True ))
   model.add(LSTM(100,dropout=0.1))
-  model.add(Dense(1,activation='softmax'))
+  model.add(Dense(3,activation='softmax'))
   model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
   model.fit(reviews[train], encoded_labels[train], epochs=3, batch_size=10, verbose=0)
 
