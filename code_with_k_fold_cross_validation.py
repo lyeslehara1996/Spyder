@@ -337,26 +337,3 @@ save_model(model, filepath,save_format='h5')
 
 
 
-
-
-
-"""
-kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=7)
-cvscores = []
-for train, test in kfold.split(reviews, encoded_labels):
-  # create model
-  model = Sequential()
-  model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
-  model.add(LSTM(100,dropout=0.1,return_sequences=True ))
-  model.add(LSTM(100,dropout=0.1))
-  model.add(Dense(1,activation='softmax'))
-  model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-  model.fit(reviews[train], encoded_labels[train], epochs=3, batch_size=10, verbose=0)
-
-	# evaluate the model
-  scores = model.evaluate(reviews[test], encoded_labels[test], verbose=0)
-# print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-# cvscores.append(scores[1] * 100)
-# print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
-
-"""
