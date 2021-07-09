@@ -5,6 +5,7 @@
 import pandas as pd 
 import re 
 import nltk
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,43 +34,33 @@ nltk.download('stopwords')
 from tensorflow.keras.utils import to_categorical
 nltk.download('punkt')
 
-SAVE_FILE = False
-
 #affichage de data frame 
 
-df=pd.read_excel('SemEval2017.xlsx')
+df=pd.read_excel('SemEval2017A.xlsx')
 df.head()
 
 df.drop("Unnamed: 3", axis=1, inplace=True)
 df.drop("Unnamed: 4", axis=1, inplace=True)
 df.drop("Unnamed: 5", axis=1, inplace=True)
 df.drop("Unnamed: 6", axis=1, inplace=True)
-df.drop("Unnamed: 7", axis=1, inplace=True)
-df.drop("Unnamed: 8", axis=1, inplace=True)
-df.drop("Unnamed: 9", axis=1, inplace=True)
-df.drop("Unnamed: 10", axis=1, inplace=True)
-df.drop("Unnamed: 11", axis=1, inplace=True)
-df.drop("Unnamed: 12", axis=1, inplace=True)
-df.drop("Unnamed: 13", axis=1, inplace=True)
-df.drop("Unnamed: 14", axis=1, inplace=True)
-df.drop("Unnamed: 15", axis=1, inplace=True)
+
 
 df.head()
 
-df.polariy.value_counts()
+df.Polarity.value_counts()
 
 df.info()
 
 #supprimer les lignes qui contient des valeur null 
 
 
-df.polariy.unique()
-df.dropna(subset=['polariy'], inplace=True)
-df.polariy.unique()
+df.Polarity.unique()
+df.dropna(subset=['Polarity'], inplace=True)
+df.Polarity.unique()
 df.info()
 
 plt.figure(figsize=(8,6))
-df.polariy.hist(xlabelsize=14)
+df.Polarity.hist(xlabelsize=14)
 plt.show()
 
 #df_clean = df
@@ -131,7 +122,7 @@ df.info()
 ######decomposition de dataframe #########
 
 reviews =  df[['Comments']]
-labels =  df[['polariy']]
+labels =  df[['Polarity']]
 reviews
 
 
@@ -150,7 +141,7 @@ reviews_cleaned
 ###### convertir to array ###########
 
 review_array = np.asarray(reviews['Comments'])
-label_array = np.asarray(labels['polariy'])
+label_array = np.asarray(labels['Polarity'])
 reviews_labels = np.stack((review_array, label_array), axis = 1)
 
 
@@ -167,9 +158,9 @@ reviews_labels
 ##### Encoder les polarity  avec le codage ordinal  ###########
 
 encoder = LabelEncoder()
-encoder.fit(labels['polariy'])
-encoded_labels = encoder.transform(labels['polariy'])
-#encoded_labels = to_categorical(encoded_labels)
+encoder.fit(labels['Polarity'])
+encoded_labels = encoder.transform(labels['Polarity'])
+encoded_labels = to_categorical(encoded_labels)
 
 encoded_labels
 
@@ -184,6 +175,8 @@ vocab_size = len(tokenizer.word_index) + 1
 maxlen = 100
 
 reviews = pad_sequences(reviews, padding='post', maxlen=maxlen)
+
+
 
 from sklearn.model_selection import KFold
 from keras.models import Sequential,save_model
@@ -208,11 +201,11 @@ for train, test in kfold.split(reviews, encoded_labels):
   model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
   model.add(LSTM(100,dropout=0.2,return_sequences=True ))
   model.add(Dropout(0.2))
-  model.add(LSTM(100,dropout=0.2,return_sequences=True ))
+  model.add(LSTM(50,dropout=0.2,return_sequences=True ))
   model.add(Dropout(0.2))
-  model.add(LSTM(100,dropout=0.2))
-  model.add(Dropout(0.2))
-  model.add(Dense(1,activation='softmax'))
+  model.add(LSTM(25,dropout=0.2))
+
+  model.add(Dense(3,activation='softmax'))
 
   # Compile the model
   model.compile(loss='categorical_crossentropy',
@@ -285,13 +278,15 @@ for train, test in kfold.split(reviews, encoded_labels):
   model.add(Embedding(input_dim=num_words,output_dim=100,input_length=100,trainable=True))
   model.add(LSTM(100,dropout=0.2,return_sequences=True ))
   model.add(Dropout(0.2))
-  model.add(Dense(100,activation='relu'))
-  model.add(Dropout(0.2))
   model.add(LSTM(50,dropout=0.2,return_sequences=True ))
   model.add(Dropout(0.2))
-  model.add(LSTM(25,dropout=0.2))
+  model.add(LSTM(32,dropout=0.2,return_sequences=True ))
   model.add(Dropout(0.2))
-  model.add(Dense(1,activation='softmax'))
+  model.add(LSTM(16,dropout=0.2,return_sequences=True ))
+  model.add(Dropout(0.2))
+  model.add(LSTM(8,dropout=0.2,return_sequences=False ))
+
+  model.add(Dense(3,activation='softmax'))
 
   # Compile the model
   model.compile(loss='categorical_crossentropy',
@@ -305,7 +300,7 @@ for train, test in kfold.split(reviews, encoded_labels):
   # Fit data to model
   history = model.fit(reviews[train], encoded_labels[train],
               batch_size=100,
-              epochs=5,
+              epochs=3,
               verbose=0)
   
   # Generate generalization metrics
@@ -333,7 +328,6 @@ print('------------------------------------------------------------------------'
 
 filepath = './Models/model2.h5'
 save_model(model, filepath,save_format='h5')
-
 
 
 
